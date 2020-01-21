@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="ISO-8859-1">
+  <title>Events</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script type="text/javascript">
+
+    $(document).ready (function () {
+
+      function showLocationOnMap (locs) {
+        var map;
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: Number(locs[locs.length-1].latitude), lng: Number(locs[locs.length-1].longitude)},
+          zoom: 8
+        });
+
+        for (var i = 0; i < locs.length; i++) {
+          var marker = new google.maps.Marker({
+            position: {lat: Number(locs[i].latitude), lng: Number(locs[i].longitude)},
+            map: map,
+            title: locs[i].nameEvent
+          });
+          marker.setMap(map);
+        }
+      }
+
+      $( "#Form" ).submit(function( event ) {
+        event.preventDefault();
+        $.ajax({
+          url: "EventTest",
+          type: "POST",
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8", // send as JSON
+          data: $.param( {nameEvent : $("#name").val(), latitude : $("#lat").val(),longitude : $("#lon").val()} ),
+          complete: function(data) {
+            console.log ("Request complete");
+
+          },
+          success: function(data) {
+            $("#status").html(JSON.stringify(data));
+            //if (data.nameEvent !=null & data.latitude !=null & data.longitude !=null) {
+              showLocationOnMap(data);
+            //}
+          },
+          error: function(err) {
+            console.log(err);
+            $("#status").html("Error:"+JSON.stringify(data));
+          },
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+
+
+<form id="Form" action="GeoIPTest" method="POST">
+  <input type="text" name = "nameEvent" id = "name"  placeholder="Event"/>
+  <input type="text" name = "latitude" id = "lat"  placeholder="latitude"/>
+  <input type="text" name = "longitude" id = "lon" placeholder="longitude"/>
+  <input type="submit" name="submit" value="Submit" />
+
+</form>
+
+<div id="status"></div>
+
+<div id="map" style="height: 500px; width:100%; position:absolute"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCf6AvQXHUI5sAu4gBF2uV2IV7LH0Woy-c"
+        async defer></script>
+</body>
+</html>
